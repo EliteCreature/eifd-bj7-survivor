@@ -4,6 +4,11 @@ use bevy::{
     image::{ImageLoaderSettings, ImageSampler},
     prelude::*,
 };
+use leafwing_input_manager::{
+    action_state::ActionState,
+    plugin::InputManagerSystem,
+    prelude::*,
+};
 
 use crate::{
     AppSystems, PausableSystems,
@@ -20,7 +25,7 @@ pub(super) fn plugin(app: &mut App) {
     // Record directional input as movement controls.
     app.add_systems(
         Update,
-        record_player_directional_input
+        record_player_directional_input.after(InputManagerSystem::Update)
             .in_set(AppSystems::RecordInput)
             .in_set(PausableSystems),
     );
@@ -41,6 +46,8 @@ pub fn player(
     (
         Name::new("Player"),
         Player,
+        ActionState::<PlayerAction>::default(),
+        Player::default_input_map(),
         Sprite::from_atlas_image(
             player_assets.ducky.clone(),
             TextureAtlas {
@@ -58,32 +65,39 @@ pub fn player(
     )
 }
 
+#[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
+pub enum PlayerAction {
+    // Movement
+    #[actionlike(DualAxis)]
+    Move,
+}
+
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
 struct Player;
 
+impl Player {
+    fn default_input_map() -> InputMap<PlayerAction> {
+        use PlayerAction::*;
+        let mut input_map = InputMap::default();
+
+        input_map.insert_dual_axis(Move, GamepadStick::LEFT.with_deadzone(-0.05,0.05));
+        input_map.insert_dual_axis(Move, VirtualDPad::wasd());
+        input_map.insert_dual_axis(Move, VirtualDPad::arrow_keys());
+
+        input_map
+    }
+}
+
 fn record_player_directional_input(
-    input: Res<ButtonInput<KeyCode>>,
+    action_state: Single<&ActionState<PlayerAction>, With<Player>>,
     mut controller_query: Query<&mut MovementController, With<Player>>,
 ) {
-    // Collect directional input.
-    let mut intent = Vec2::ZERO;
-    if input.pressed(KeyCode::KeyW) || input.pressed(KeyCode::ArrowUp) {
-        intent.y += 1.0;
-    }
-    if input.pressed(KeyCode::KeyS) || input.pressed(KeyCode::ArrowDown) {
-        intent.y -= 1.0;
-    }
-    if input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft) {
-        intent.x -= 1.0;
-    }
-    if input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight) {
-        intent.x += 1.0;
-    }
+    let mut intent = action_state.clamped_axis_pair(&PlayerAction::Move);
 
-    // Normalize intent so that diagonal movement is the same speed as horizontal / vertical.
-    // This should be omitted if the input comes from an analog stick instead.
-    let intent = intent.normalize_or_zero();
+    if intent.length_squared() > 1.0 {
+        intent = intent.normalize();
+    }
 
     // Apply movement intent to controllers.
     for mut controller in &mut controller_query {

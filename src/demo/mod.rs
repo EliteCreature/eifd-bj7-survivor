@@ -4,11 +4,16 @@
 //! to get a feeling for the template.
 
 use bevy::prelude::*;
+use leafwing_input_manager::{
+    prelude::*,
+};
 
 mod animation;
 pub mod level;
 mod movement;
 pub mod player;
+
+use crate::demo::player::PlayerAction;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
@@ -16,5 +21,6 @@ pub(super) fn plugin(app: &mut App) {
         level::plugin,
         movement::plugin,
         player::plugin,
+        InputManagerPlugin::<PlayerAction>::default(),
     ));
 }
