@@ -74,7 +74,7 @@ pub enum PlayerAction {
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
-struct Player;
+pub struct Player;
 
 impl Player {
     fn default_input_map() -> InputMap<PlayerAction> {
