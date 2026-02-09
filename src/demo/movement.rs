@@ -13,14 +13,15 @@
 //! purposes. If you want to move the player in a smoother way,
 //! consider using a [fixed timestep](https://github.com/bevyengine/bevy/blob/main/examples/movement/physics_in_fixed_timestep.rs).
 
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::prelude::*;
+//us bevy::window::PrimaryWindow;
 
 use crate::{AppSystems, PausableSystems};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         Update,
-        (apply_movement, apply_screen_wrap)
+        (apply_movement) //, apply_screen_wrap)
             .chain()
             .in_set(AppSystems::Update)
             .in_set(PausableSystems),
@@ -61,6 +62,7 @@ fn apply_movement(
     }
 }
 
+/*
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct ScreenWrap;
@@ -77,3 +79,4 @@ fn apply_screen_wrap(
         transform.translation = wrapped.extend(transform.translation.z);
     }
 }
+*/

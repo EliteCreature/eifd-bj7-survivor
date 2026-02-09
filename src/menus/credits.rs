@@ -34,6 +34,7 @@ fn created_by() -> impl Bundle {
     grid(vec![
         ["Joe Shmoe", "Implemented alligator wrestling AI"],
         ["Jane Doe", "Made the music for the alien invasion"],
+        ["Jake", "Jake is the worst, I don't even know why he's around"],
     ])
 }
 

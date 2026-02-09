@@ -15,7 +15,7 @@ use crate::{
     asset_tracking::LoadResource,
     demo::{
         animation::PlayerAnimation,
-        movement::{MovementController, ScreenWrap},
+        movement::{MovementController},//, ScreenWrap},
     },
 };
 
@@ -60,7 +60,7 @@ pub fn player(
             max_speed,
             ..default()
         },
-        ScreenWrap,
+        //ScreenWrap,
         player_animation,
     )
 }
